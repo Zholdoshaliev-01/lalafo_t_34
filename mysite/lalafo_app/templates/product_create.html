@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Добавить товар</title>
+    <style>
+        :root {
+            --bg: #f5f6fa;
+            --card: #ffffff;
+            --text: #1f2430;
+            --muted: #7a8194;
+            --accent: #6c5ce7;
+            --accent-soft: rgba(108, 92, 231, .12);
+            --border: #dfe2ee;
+            --error: #e17055;
+            --shadow: 0 4px 14px rgba(20, 20, 50, .08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #12141c;
+                --card: #1c1f2b;
+                --text: #eceef5;
+                --muted: #9aa1b5;
+                --border: #2f3446;
+                --shadow: 0 4px 14px rgba(0, 0, 0, .4);
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 32px 20px 56px; }
+        .back {
+            display: inline-block;
+            color: var(--muted);
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: color .2s ease;
+        }
+        .back:hover { color: var(--accent); }
+
+        .form-card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+        @media (max-width: 600px) { .form-card { padding: 20px; } }
+        .form-title { font-size: 1.7rem; font-weight: 700; margin-bottom: 6px; }
+        .form-subtitle { color: var(--muted); margin-bottom: 28px; }
+
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) { .fields { grid-template-columns: 1fr; } }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { font-size: .9rem; font-weight: 600; }
+
+        .field input[type="text"],
+        .field input[type="number"],
+        .field input[type="tel"],
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .field select option { color: #1f2430; }
+        .field textarea { min-height: 120px; resize: vertical; }
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+        .field input[type="file"] {
+            padding: 12px;
+            border: 1.5px dashed var(--border);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+        }
+        .field input[type="file"]::file-selector-button {
+            margin-right: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .check {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+        }
+        .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .check label { font-weight: 500; }
+
+        .help { color: var(--muted); font-size: .8rem; }
+        .errors { color: var(--error); font-size: .85rem; list-style: none; }
+
+        .actions { display: flex; gap: 12px; margin-top: 28px; }
+        .btn {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            font: inherit;
+            font-weight: 600;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(108, 92, 231, .35); }
+        .btn-ghost { background: var(--accent-soft); color: var(--accent); }
+        .btn-ghost:hover { background: var(--accent); color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'product_list' %}" class="back">← Все товары</a>
+
+        <div class="form-card">
+            <h1 class="form-title">Добавить товар</h1>
+            <p class="form-subtitle">Заполните информацию о товаре</p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <ul class="errors" style="margin-bottom:16px">
+                        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="fields">
+                    {% for field in form %}
+                    <div class="field{% if field.name == 'descriptions' or field.name == 'product_image' %} full{% endif %}{% if field.name == 'type' %} check{% endif %}">
+                        {% if field.name == 'type' %}
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}">Оригинал</label>
+                        {% else %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.help_text %}<span class="help">{{ field.help_text }}</span>{% endif %}
+                        {% if field.errors %}
+                            <ul class="errors">
+                                {% for e in field.errors %}<li>{{ e }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="actions">
+                    <a href="{% url 'product_list' %}" class="btn btn-ghost">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

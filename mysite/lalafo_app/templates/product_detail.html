@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ product.product_name }}</title>
+    <style>
+        :root {
+            --bg: #f5f6fa;
+            --card: #ffffff;
+            --text: #1f2430;
+            --muted: #7a8194;
+            --accent: #6c5ce7;
+            --accent-soft: rgba(108, 92, 231, .12);
+            --ok: #00a67e;
+            --ok-soft: rgba(0, 166, 126, .12);
+            --warn: #e17055;
+            --warn-soft: rgba(225, 112, 85, .12);
+            --danger: #e0434f;
+            --danger-soft: rgba(224, 67, 79, .12);
+            --border: #e8eaf2;
+            --shadow: 0 4px 14px rgba(20, 20, 50, .08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #12141c;
+                --card: #1c1f2b;
+                --text: #eceef5;
+                --muted: #9aa1b5;
+                --border: #2a2e3d;
+                --shadow: 0 4px 14px rgba(0, 0, 0, .4);
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 56px; }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .95rem;
+            margin-bottom: 20px;
+            transition: color .2s ease;
+        }
+        .back:hover { color: var(--accent); }
+
+        .product {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 36px;
+            background: var(--card);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+        @media (max-width: 800px) {
+            .product { grid-template-columns: 1fr; padding: 18px; gap: 24px; }
+        }
+
+        .gallery {
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        }
+        .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .no-photo {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, .9);
+        }
+        .no-photo span:first-child { font-size: 3.5rem; }
+
+        .info { display: flex; flex-direction: column; gap: 18px; }
+        .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+        .badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .badge.ok { background: var(--ok-soft); color: var(--ok); }
+        .badge.warn { background: var(--warn-soft); color: var(--warn); }
+
+        .title { font-size: 1.9rem; font-weight: 700; line-height: 1.2; }
+        .price { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
+        .price small { font-size: 1rem; font-weight: 500; color: var(--muted); }
+
+        .specs {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .spec {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 16px;
+            font-size: .95rem;
+        }
+        .spec + .spec { border-top: 1px solid var(--border); }
+        .spec .label { color: var(--muted); }
+        .spec .value { font-weight: 600; text-align: right; }
+
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 14px 20px;
+            border-radius: 14px;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+        }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(108, 92, 231, .35);
+        }
+        .btn-ghost { background: var(--accent-soft); color: var(--accent); }
+        .btn-ghost:hover { background: var(--accent); color: #fff; }
+        .btn-danger { background: var(--danger-soft); color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+
+        .description {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--border);
+            padding-top: 22px;
+        }
+        .description h2 { font-size: 1.15rem; margin-bottom: 10px; }
+        .description p { color: var(--muted); line-height: 1.65; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'product_list' %}" class="back">← Все товары</a>
+
+        <div class="product">
+            <div class="gallery">
+                {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}">
+                {% else %}
+                    <div class="no-photo">
+                        <span>📷</span>
+                        <span>Нет фото</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="info">
+                <div class="badges">
+                    {% if product.category %}
+                        <span class="badge">{{ product.category.category_name }}</span>
+                    {% endif %}
+                    {% if product.type %}
+                        <span class="badge ok">✔ Оригинал</span>
+                    {% else %}
+                        <span class="badge warn">Не оригинал</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="title">{{ product.product_name }}</h1>
+                <div class="price">{{ product.price }} <small>сом</small></div>
+
+                <div class="specs">
+                    <div class="spec">
+                        <span class="label">Город</span>
+                        <span class="value">📍 {{ product.city }}</span>
+                    </div>
+                    <div class="spec">
+                        <span class="label">Телефон</span>
+                        <span class="value">{{ product.phone_number.as_international }}</span>
+                    </div>
+                    <div class="spec">
+                        <span class="label">ID товара</span>
+                        <span class="value">#{{ product.number_product }}</span>
+                    </div>
+                    <div class="spec">
+                        <span class="label">Дата добавления</span>
+                        <span class="value">{{ product.created_date|date:"d.m.Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a class="btn btn-primary" href="tel:{{ product.phone_number.as_e164 }}">📞 Позвонить</a>
+                    <a class="btn btn-ghost" href="{% url 'product_update' product.pk %}">✏️ Редактировать</a>
+                    <a class="btn btn-danger" href="{% url 'product_delete' product.pk %}">🗑️ Удалить</a>
+                </div>
+            </div>
+
+            <div class="description">
+                <h2>Описание</h2>
+                {% if product.descriptions %}
+                    <p>{{ product.descriptions|linebreaksbr }}</p>
+                {% else %}
+                    <p>Описание не указано.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
